@@ -28,9 +28,9 @@ erase:
 	$(AVRDUDE) -U flash:w:$*.hex
 	date >$@
 
-prun: prog run
+prun: prog size run
 
-reprun: clean prog run
+reprun: clean prun
 
 run:
 	screen -q -r $(SERIAL_DEV) || screen -S $(SERIAL_DEV) /dev/$(SERIAL_DEV) $(BAUD)
