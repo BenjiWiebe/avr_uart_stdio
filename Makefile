@@ -1,31 +1,36 @@
-DEVICE=atmega16a
+ELF=test_bufferedio.elf
 BAUD?=9600
+F_CPU=8000000
 SERIAL_DEV=ttyS0
-AVRDUDE=avrdude -c avrispmkII -p m16 -e
+DEVICE=atmega16a
+DUDE_DEVNAME=m16
+DUDE_ISP=avrispmkII
+
+AVRDUDE=avrdude -c $(DUDE_ISP) -p $(DUDE_DEVNAME) -e
 CC=avr-gcc
 SIZE=avr-size
 OBJDUMP=avr-objdump
 OBJCOPY=avr-objcopy
-CFLAGS=-std=gnu99 -Os -DBAUD=$(BAUD) -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=$(DEVICE)
+CFLAGS=-std=gnu99 -Os -DBAUD=$(BAUD) -DF_CPU=$(F_CPU) -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=$(DEVICE)
 LDFLAGS=-Wl,--gc-sections -mmcu=$(DEVICE)
+SOURCES=$(wildcard *.c)
+OBJECTS=$(SOURCES:.c=.o)
+HEX=$(ELF:.elf=.hex)
 
-PROGRAM?=avr_uart_stdio
-
-HEX=$(PROGRAM).hex
 
 all: $(HEX) size
 
 size:
-	$(SIZE) -C --mcu=$(DEVICE) $(PROGRAM).elf
+	$(SIZE) -C --mcu=$(DEVICE) $(ELF)
 
-prog: $(PROGRAM).burned
+prog: $(HEX).burned
 
 erase:
 	rm -f $(PROGRAM).burned
 	$(AVRDUDE) -e
 
-%.burned: $(HEX)
-	$(AVRDUDE) -U flash:w:$*.hex
+$(HEX).burned: $(HEX)
+	$(AVRDUDE) -U flash:w:$(HEX)
 	date >$@
 
 prun: prog size run
@@ -44,14 +49,14 @@ close:
 %.lss: %.elf
 	$(OBJDUMP) -h -S $< >$@
 
-%.elf: %.o
-	$(CC) $< -o $@ -Wl,-Map="$*.map" $(LDFLAGS)
+%.elf: $(OBJECTS)
+	$(CC) $^ -o $@ -Wl,-Map="$*.map" $(LDFLAGS)
 
 %.hex: %.elf %.lss
 	$(OBJCOPY) -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user $< $@
 	
 clean: close
-	rm -f $(PROGRAM).lss $(PROGRAM).hex $(PROGRAM).o $(PROGRAM).elf $(PROGRAM).map
+	rm -f *.lss *.hex *.o *.elf *.map *.burned
 
 .PRECIOUS: %.o %.lss
 .PHONY: clean
