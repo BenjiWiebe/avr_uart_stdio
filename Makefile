@@ -35,6 +35,8 @@ $(HEX).burned: $(HEX)
 
 prun: prog size run
 
+zero: clean erase close
+
 reprun: clean prun
 
 run:
