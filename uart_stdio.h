@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define INBUF_SIZE 128
+#define INBUF_SIZE		128
+#define MAX_WRITE_BUF	128
+#define MAX_READ_BUF	128
 #ifndef BAUD
 #	define BAUD	9600
 #endif

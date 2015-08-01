@@ -13,7 +13,7 @@ OBJDUMP=avr-objdump
 OBJCOPY=avr-objcopy
 CFLAGS=-std=gnu99 -Os -DBAUD=$(BAUD) -DF_CPU=$(F_CPU) -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=$(DEVICE)
 LDFLAGS=-Wl,--gc-sections -mmcu=$(DEVICE)
-SOURCES=$(wildcard *.c)
+SOURCES=uart_stdio_poll.c example.c
 OBJECTS=$(SOURCES:.c=.o)
 HEX=$(ELF:.elf=.hex)
 
