@@ -5,6 +5,7 @@ SERIAL_DEV=ttyS0
 DEVICE=atmega16a
 DUDE_DEVNAME=m16
 DUDE_ISP=avrispmkII
+BACKEND=poll
 
 AVRDUDE=avrdude -c $(DUDE_ISP) -p $(DUDE_DEVNAME) -e
 CC=avr-gcc
@@ -13,12 +14,12 @@ OBJDUMP=avr-objdump
 OBJCOPY=avr-objcopy
 CFLAGS=-std=gnu99 -Os -DBAUD=$(BAUD) -DF_CPU=$(F_CPU) -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -Wall -mmcu=$(DEVICE)
 LDFLAGS=-Wl,--gc-sections -mmcu=$(DEVICE)
-SOURCES=uart_stdio_poll.c example.c
+SOURCES=uart_stdio_$(BACKEND).c example.c
 OBJECTS=$(SOURCES:.c=.o)
 HEX=$(ELF:.elf=.hex)
 
 
-all: $(HEX) size
+all: $(OBJECTS) $(HEX) size
 
 size:
 	$(SIZE) -C --mcu=$(DEVICE) $(ELF)
@@ -58,7 +59,7 @@ close:
 	$(OBJCOPY) -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user $< $@
 	
 clean: close
-	rm -f *.lss *.hex *.o *.elf *.map *.burned
+	rm -f *.lss *.hex *.o *.elf *.map *.burned Makefile.bak
 
 .PRECIOUS: %.o %.lss
 .PHONY: clean
