@@ -26,6 +26,10 @@ size:
 
 prog: $(HEX).burned
 
+reprog:
+	rm -f $(HEX.burned)
+	$(MAKE) prog
+
 erase:
 	rm -f $(PROGRAM).burned
 	$(AVRDUDE) -e
